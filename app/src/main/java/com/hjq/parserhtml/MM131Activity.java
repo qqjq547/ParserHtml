@@ -19,6 +19,8 @@ import com.hjq.parserhtml.http.retrofit.ApiClient;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,9 +63,7 @@ public class MM131Activity extends AppCompatActivity {
     }
 
     public void startDown() {
-        for (Model model : dataArr) {
-            downPic(model.getArrarId(), 1);
-        }
+        downPic(0, 1);
     }
 
     public void onUnsubscribe() {
@@ -116,18 +116,15 @@ public class MM131Activity extends AppCompatActivity {
 
     }
 
-    public void downPic(final int arrayId, final int index) {
-        String url = "http://img1.mm131.com/pic/" + arrayId + "/" + index + ".jpg";
+    public void downPic(final int position, final int index) {
+        String url = "http://img1.mm131.com/pic/" + dataArr.get(position).getArrarId() + "/" + index + ".jpg";
         addSubscription(RxUtil.createBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
-                saveBitmap(data, arrayId + "_" + index + ".png");
-                Model model = dataArr.get(arrayId - start);
+                Model model = dataArr.get(position);
+                saveBitmap(data, model.getArrarId() + "_" + index + ".png");
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyDataSetChanged();
-                if (index < model.getCount()) {
-                    downPic(arrayId, index + 1);
-                }
             }
 
             @Override
@@ -137,34 +134,36 @@ public class MM131Activity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-
+                if (index < dataArr.get(position).getCount()) {
+                    downPic(position, index + 1);
+                }else{
+                    if (position<(dataArr.size()-1)) {
+                        downPic(position+1, 1);
+                    }
+                }
             }
         }));
 
     }
-    public void saveBitmap(final Bitmap bm, final String fileName) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File f = new File(dir, fileName);
-                if (f.exists()) {
-                    f.delete();
-                }
-                try {
-                    FileOutputStream out = new FileOutputStream(f);
-                    bm.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    out.flush();
-                    out.close();
-                    Log.i("hjq", "已经保存:" + f.getAbsolutePath());
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    Log.e("hjq", "保存失败:" + f.getAbsolutePath());
-                }
-
-            }
-        }).start();
-
+    public void saveBitmap(Bitmap bm, final String fileName) {
+        File f = new File(dir, fileName);
+        if (f.exists()) {
+            f.delete();
+        }
+        try {
+            FileOutputStream out = new FileOutputStream(f);
+            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+            Log.i("hjq", "已经保存:" + f.getAbsolutePath());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e("hjq", "保存失败:" + f.getAbsolutePath());
+        }finally {
+            bm.recycle();
+            bm=null;
+        }
     }
 
     @OnClick({R.id.btn_get, R.id.btn_down})

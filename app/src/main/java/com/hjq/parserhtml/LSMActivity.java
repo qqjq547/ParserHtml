@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,12 +65,15 @@ public class LSMActivity extends AppCompatActivity {
     }
 
     public void startDown() {
-        for (int i=0;i<dataArr.size();i++) {
-            Model2 model=dataArr.get(i);
-            if (model.getUrlArr().size()>0) {
-                downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
-            }
-        }
+        Model2 model=dataArr.get(0);
+        downPic(0, 1, model.getUrlArr().get(0));
+//        for (int i=0;i<dataArr.size();i++) {
+//            Model2 model=dataArr.get(i);
+//            downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
+//            if (model.getUrlArr().size()>0) {
+//                downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
+//            }
+//        }
     }
 
     public void onUnsubscribe() {
@@ -125,7 +130,10 @@ public class LSMActivity extends AppCompatActivity {
                     String[] srcArr=textArr[i].split("src=\"");
                     String url=srcArr[srcArr.length-1];
                     Log.d("hjq", "url=" + url);
-                    urlArr.add(url);
+                    String reg="(?i).+?\\.(jpg|png|jpeg)";
+                    if (url.matches(reg)) {
+                        urlArr.add(url);
+                    }
                 }
                 Model2 model2=dataArr.get(position);
                 model2.setCount(model2.getCount()+urlArr.size());
@@ -155,17 +163,15 @@ public class LSMActivity extends AppCompatActivity {
 
     }
 
-    public void downPic(final int position,final int arrayId, final int index,String url) {
-        addSubscription(RxUtil.createBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
+    public void downPic(final int position, final int index,String url) {
+        addSubscription(RxUtil.createCompressBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
-                saveBitmap(data, arrayId + "_" + index + ".png");
                 Model2 model = dataArr.get(position);
+                saveBitmap(data, model.getArrarId() + "_" + index + ".png");
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyDataSetChanged();
-                if (index < model.getCount()) {
-                    downPic(position,arrayId, index + 1,model.getUrlArr().get(index));
-                }
+
             }
 
             @Override
@@ -175,35 +181,38 @@ public class LSMActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-
+                Model2 model = dataArr.get(position);
+                if (index < model.getCount()) {
+                    downPic(position, index + 1,model.getUrlArr().get(index));
+                }else{
+                    if (position<(dataArr.size()-1)) {
+                        downPic(position + 1, 1, model.getUrlArr().get(0));
+                    }
+                }
             }
         }));
 
     }
 
-    public void saveBitmap(final Bitmap bm, final String fileName) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File f = new File(dir, fileName);
-                if (f.exists()) {
-                    f.delete();
-                }
-                try {
-                    FileOutputStream out = new FileOutputStream(f);
-                    bm.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    out.flush();
-                    out.close();
-                    Log.i("hjq", "已经保存:" + f.getAbsolutePath());
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    Log.e("hjq", "保存失败:" + f.getAbsolutePath());
-                }
-
-            }
-        }).start();
-
+    public void saveBitmap(Bitmap bm, final String fileName) {
+        File f = new File(dir, fileName);
+        if (f.exists()) {
+            f.delete();
+        }
+        try {
+            FileOutputStream out = new FileOutputStream(f);
+            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+            Log.i("hjq", "已经保存:" + f.getAbsolutePath());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.e("hjq", "保存失败:" + f.getAbsolutePath());
+        }finally {
+            bm.recycle();
+            bm=null;
+        }
     }
 
     @OnClick({R.id.btn_get, R.id.btn_down})

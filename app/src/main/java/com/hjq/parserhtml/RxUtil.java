@@ -3,8 +3,11 @@ package com.hjq.parserhtml;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import org.w3c.dom.Document;
+
+import java.io.File;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,7 +51,28 @@ public class RxUtil {
                         android.graphics.Bitmap bitmap=null;
                         try {
                             bitmap=BitmapFactory.decodeStream(arg0.byteStream());
-//                            bitmap=BitmapFactory.decodeByteArray(arg0.bytes(),0,arg0.bytes().length);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return createData(bitmap);
+                    }
+                });
+            }
+        };
+    }
+    public static <Bitmap> Observable.Transformer<ResponseBody, android.graphics.Bitmap> handleCompressResult() {   //compose判断结果
+        return new Observable.Transformer<ResponseBody, android.graphics.Bitmap>() {
+            @Override
+            public Observable<android.graphics.Bitmap> call(Observable<ResponseBody> httpResponseObservable) {
+                return httpResponseObservable.flatMap(new Func1<ResponseBody, Observable<android.graphics.Bitmap>>() {
+                    @Override
+                    public Observable<android.graphics.Bitmap> call(ResponseBody arg0) {
+                        android.graphics.Bitmap bitmap=null;
+                        try {
+                                BitmapFactory.Options opts = new BitmapFactory.Options();
+                                opts.inSampleSize = 2;
+                                bitmap = null;
+                                bitmap = BitmapFactory.decodeStream(arg0.byteStream(), null, opts);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -90,6 +114,11 @@ public class RxUtil {
         return observable
                 .compose(RxUtil.<ResponseBody>rxSchedulerHelper())
                 .compose(RxUtil.<Bitmap>handleResult());
+    }
+    public static <T> Observable<Bitmap> createCompressBmpObservable(Observable<ResponseBody> observable) {
+        return observable
+                .compose(RxUtil.<ResponseBody>rxSchedulerHelper())
+                .compose(RxUtil.<Bitmap>handleCompressResult());
     }
     public static <T> Observable<Document> createHtmlObservable(Observable<ResponseBody> observable) {
         return observable
