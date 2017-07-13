@@ -1,22 +1,20 @@
-package com.hjq.parserhtml;
-
-import java.util.List;
+package com.hjq.parserhtml.model;
 
 /**
  * Created by Administrator on 2017/7/6.
  */
 
-public class Model2 {
+public class MM131 {
     private int arrarId;
+    private String title;
     private int count;
     private int downNum;
-    private List<String> urlArr;
 
-    public Model2(int arrarId, int count, int downNum, List<String> urlArr) {
+    public MM131(int arrarId, String title, int count, int downNum) {
         this.arrarId = arrarId;
+        this.title = title;
         this.count = count;
         this.downNum = downNum;
-        this.urlArr = urlArr;
     }
 
     public int getArrarId() {
@@ -25,6 +23,14 @@ public class Model2 {
 
     public void setArrarId(int arrarId) {
         this.arrarId = arrarId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public int getCount() {
@@ -41,13 +47,5 @@ public class Model2 {
 
     public void setDownNum(int downNum) {
         this.downNum = downNum;
-    }
-
-    public List<String> getUrlArr() {
-        return urlArr;
-    }
-
-    public void setUrlArr(List<String> urlArr) {
-        this.urlArr = urlArr;
     }
 }

@@ -1,9 +1,14 @@
-package com.hjq.parserhtml;
+package com.hjq.parserhtml.activity;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -13,16 +18,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hjq.parserhtml.adapter.LSMAdapter;
+import com.hjq.parserhtml.R;
+import com.hjq.parserhtml.RxUtil;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
 import com.hjq.parserhtml.http.retrofit.ApiClient;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
+import com.hjq.parserhtml.model.LSM;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,11 +39,10 @@ import rx.subscriptions.CompositeSubscription;
 
 public class LSMActivity extends AppCompatActivity {
     String dir = Environment.getExternalStorageDirectory() + File.separator + "lesmao" + File.separator;
-    ArrayList<Model2> dataArr = new ArrayList<>();
-    ArrayList<Integer> typeArr = new ArrayList<>();
-    @BindView(R.id.listview)
-    ListView listview;
-    MyAdapter2 adapter;
+    ArrayList<LSM> dataArr = new ArrayList<>();
+    @BindView(R.id.rv_list)
+    RecyclerView rvList;
+    LSMAdapter adapter;
     int pageNum = 0;
     int count = 0;
     @BindView(R.id.ev_page)
@@ -59,16 +65,19 @@ public class LSMActivity extends AppCompatActivity {
         if (!new File(dir).exists()) {
             new File(dir).mkdir();
         }
-        adapter = new MyAdapter2(dataArr);
-        listview.setAdapter(adapter);
+        rvList.setLayoutManager(new LinearLayoutManager(this));
+        rvList.addItemDecoration(new DividerItemDecoration(this, OrientationHelper.VERTICAL));
+        rvList.setItemAnimator(new DefaultItemAnimator());
+        adapter = new LSMAdapter(this,dataArr);
+        rvList.setAdapter(adapter);
 
     }
 
     public void startDown() {
-        Model2 model=dataArr.get(0);
+        LSM model=dataArr.get(0);
         downPic(0, 1, model.getUrlArr().get(0));
 //        for (int i=0;i<dataArr.size();i++) {
-//            Model2 model=dataArr.get(i);
+//            LSM model=dataArr.get(i);
 //            downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
 //            if (model.getUrlArr().size()>0) {
 //                downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
@@ -96,11 +105,15 @@ public class LSMActivity extends AppCompatActivity {
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 for (int i=1;i<count+1;i++){
-                    String typeid=textArr[i].split("-")[0];
-                    Log.d("hjq", "typeid=" + typeid);
-                    typeArr.add(Integer.parseInt(typeid));
+                    int typeid=Integer.parseInt(textArr[i].split("-")[0]);
+                    String title=textArr[i].split("alt=\"")[1].split("\" />")[0];
+                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
+                    dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
                 }
-
+                adapter.notifyDataSetChanged();
+                for (int i=0;i<dataArr.size();i++){
+                    getSize(i,dataArr.get(i).getArrarId(),1);
+                }
             }
 
             @Override
@@ -110,10 +123,7 @@ public class LSMActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                for (int i=0;i<typeArr.size();i++){
-                      dataArr.add(new Model2(typeArr.get(i),0,0,new ArrayList<String>()));
-                      getSize(i,typeArr.get(i),1);
-                 }
+
             }
         }));
 
@@ -135,10 +145,10 @@ public class LSMActivity extends AppCompatActivity {
                         urlArr.add(url);
                     }
                 }
-                Model2 model2=dataArr.get(position);
+                LSM model2=dataArr.get(position);
                 model2.setCount(model2.getCount()+urlArr.size());
                 model2.getUrlArr().addAll(urlArr);
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemChanged(position);
             }
 
             @Override
@@ -152,7 +162,7 @@ public class LSMActivity extends AppCompatActivity {
                     getSize(position,id,page + 1);
                 } else {
 //                    int count=0;
-//                    for (Model2 mm:dataArr){
+//                    for (LSM mm:dataArr){
 //                        count=count+mm.getCount();
 //                    }
 //                    tvTotal.setText("共"+count+"个文件");
@@ -167,10 +177,10 @@ public class LSMActivity extends AppCompatActivity {
         addSubscription(RxUtil.createCompressBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
-                Model2 model = dataArr.get(position);
+                LSM model = dataArr.get(position);
                 saveBitmap(data, model.getArrarId() + "_" + index + ".png");
                 model.setDownNum(model.getDownNum() + 1);
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemChanged(position);
 
             }
 
@@ -181,7 +191,7 @@ public class LSMActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                Model2 model = dataArr.get(position);
+                LSM model = dataArr.get(position);
                 if (index < model.getCount()) {
                     downPic(position, index + 1,model.getUrlArr().get(index));
                 }else{
