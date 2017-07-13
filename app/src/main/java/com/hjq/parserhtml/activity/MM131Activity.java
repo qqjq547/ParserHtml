@@ -101,7 +101,10 @@ public class MM131Activity extends AppCompatActivity {
                 String[] array = endStr.split("ҳ</span>");
                 int count = Integer.parseInt(array[0]);
                 String title=data.split("<h2 class=\"mm-title\">")[1].split("</h2>")[0];
-                dataArr.add(new MM131(id,title,count, 0));
+                String time=data.split("<span class=\"post-meta\">")[1].split("</span>")[0];
+                MM131 model=new MM131(id,title,count, 0);
+                model.setTime(time);
+                dataArr.add(model);
                 adapter.notifyDataSetChanged();
                 Log.d("hjq", "count=" + count);
             }

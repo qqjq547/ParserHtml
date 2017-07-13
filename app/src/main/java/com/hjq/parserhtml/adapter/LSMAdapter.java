@@ -44,6 +44,7 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));
         holder.tvCount.setText(String.valueOf(model.getCount()));
         holder.tvDownnum.setText(String.valueOf(model.getDownNum()));
+        holder.tvTime.setText(model.getTime());
     }
 
     @Override
@@ -66,6 +67,8 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
         TextView tvCount;
         @BindView(R.id.tv_downnum)
         TextView tvDownnum;
+        @BindView(R.id.tv_time)
+        TextView tvTime;
 
         ViewHolder(View view) {
             super(view);

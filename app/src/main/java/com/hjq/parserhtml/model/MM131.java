@@ -7,6 +7,7 @@ package com.hjq.parserhtml.model;
 public class MM131 {
     private int arrarId;
     private String title;
+    private String time;
     private int count;
     private int downNum;
 
@@ -47,5 +48,13 @@ public class MM131 {
 
     public void setDownNum(int downNum) {
         this.downNum = downNum;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

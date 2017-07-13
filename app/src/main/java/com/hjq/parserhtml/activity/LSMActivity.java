@@ -136,6 +136,7 @@ public class LSMActivity extends AppCompatActivity {
                 String tag = "\" /></a></li>";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
+                String time=data.split("<em>")[1].split("</em>")[0];
                 for (int i=0;i<textArr.length-1;i++){
                     String[] srcArr=textArr[i].split("src=\"");
                     String url=srcArr[srcArr.length-1];
@@ -148,6 +149,7 @@ public class LSMActivity extends AppCompatActivity {
                 LSM model2=dataArr.get(position);
                 model2.setCount(model2.getCount()+urlArr.size());
                 model2.getUrlArr().addAll(urlArr);
+                model2.setTime(time);
                 adapter.notifyItemChanged(position);
             }
 

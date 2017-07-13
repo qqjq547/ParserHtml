@@ -10,6 +10,7 @@ public class LSM {
     private int arrarId;
     private String title;
     private String thumb;
+    private String time;
     private int count;
     private int downNum;
     private List<String> urlArr;
@@ -69,5 +70,13 @@ public class LSM {
 
     public void setUrlArr(List<String> urlArr) {
         this.urlArr = urlArr;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }
