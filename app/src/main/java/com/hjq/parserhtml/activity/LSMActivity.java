@@ -44,11 +44,14 @@ public class LSMActivity extends AppCompatActivity {
     RecyclerView rvList;
     LSMAdapter adapter;
     int pageNum = 0;
-    int count = 0;
+    int start = 0;
+    int end = 0;
     @BindView(R.id.ev_page)
     EditText evPage;
-    @BindView(R.id.ev_count)
-    EditText evCount;
+    @BindView(R.id.ev_start)
+    EditText evStart;
+    @BindView(R.id.ev_end)
+    EditText evEnd;
     @BindView(R.id.btn_get)
     Button btnGet;
     @BindView(R.id.btn_down)
@@ -97,14 +100,14 @@ public class LSMActivity extends AppCompatActivity {
         }
         mCompositeSubscription.add(subscription);
     }
-    public void getPageData(final int pageNum,final int count) {
+    public void getPageData(final int pageNum,final  int start,final int count) {
         addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getPageData(pageNum)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
                 String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
-                for (int i=1;i<count+1;i++){
+                for (int i=start;i<end+1;i++){
                     int typeid=Integer.parseInt(textArr[i].split("-")[0]);
                     String title=textArr[i].split("alt=\"")[1].split("\" />")[0];
                     String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
@@ -232,13 +235,19 @@ public class LSMActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.btn_get:
                 String pageNumStr = evPage.getText().toString().trim();
-                String countStr = evCount.getText().toString().trim();
-                if (TextUtils.isEmpty(pageNumStr) || TextUtils.isEmpty(countStr)) {
+                String startStr = evStart.getText().toString().trim();
+                String endStr = evEnd.getText().toString().trim();
+                if (TextUtils.isEmpty(pageNumStr) || TextUtils.isEmpty(startStr)||TextUtils.isEmpty(endStr)) {
                     Toast.makeText(this, "内容不能为空", Toast.LENGTH_SHORT).show();
                 } else {
                     pageNum=Integer.parseInt(pageNumStr);
-                    count=Integer.parseInt(countStr);
-                    getPageData(pageNum,count);
+                    start=Integer.parseInt(startStr);
+                    end=Integer.parseInt(endStr);
+                    if (end>36||start<1||start>end){
+                        Toast.makeText(this, "内容不规范", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    getPageData(pageNum,start,end);
 
                 }
                 break;

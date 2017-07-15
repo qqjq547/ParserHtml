@@ -12,26 +12,31 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:inputType="number"
-          android:hint="输入页数"/>
+          android:hint="页数"/>
       <EditText
-          android:id="@+id/ev_count"
+          android:id="@+id/ev_start"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:inputType="number"
-          android:hint="输入条数"/>
+          android:hint="开始"/>
+      <EditText
+          android:id="@+id/ev_end"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:inputType="number"
+          android:hint="结束"/>
       <Button
           android:id="@+id/btn_get"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_weight="1"
           android:hint="开始获取"
           />
       <Button
           android:id="@+id/btn_down"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_weight="1"
           android:hint="开始下载"
           />
   </LinearLayout>
