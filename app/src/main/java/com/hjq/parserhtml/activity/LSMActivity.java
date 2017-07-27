@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hjq.parserhtml.CommonUtil;
 import com.hjq.parserhtml.adapter.LSMAdapter;
 import com.hjq.parserhtml.R;
 import com.hjq.parserhtml.RxUtil;
@@ -28,7 +29,9 @@ import com.hjq.parserhtml.model.LSM;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,6 +42,9 @@ import rx.subscriptions.CompositeSubscription;
 
 public class LSMActivity extends AppCompatActivity {
     String dir = Environment.getExternalStorageDirectory() + File.separator + "lesmao" + File.separator;
+    public static final String FORMAT_DATE_All = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMAT_DATE_FILE = "yyyyMMdd_HHmmss";
+    public static final String FORMAT_DATE_DIR = "yyyyMMdd";
     ArrayList<LSM> dataArr = new ArrayList<>();
     @BindView(R.id.rv_list)
     RecyclerView rvList;
@@ -179,11 +185,12 @@ public class LSMActivity extends AppCompatActivity {
     }
 
     public void downPic(final int position, final int index,String url) {
+        Log.d("hjq","downUrl="+url);
         addSubscription(RxUtil.createCompressBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 LSM model = dataArr.get(position);
-                saveBitmap(data, model.getArrarId() + "_" + index + ".png");
+                saveBitmap(data, model,index);
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyItemChanged(position);
 
@@ -201,7 +208,7 @@ public class LSMActivity extends AppCompatActivity {
                     downPic(position, index + 1,model.getUrlArr().get(index));
                 }else{
                     if (position<(dataArr.size()-1)) {
-                        downPic(position + 1, 1, model.getUrlArr().get(0));
+                        downPic(position + 1, 1, dataArr.get(position+1).getUrlArr().get(0));
                     }
                 }
             }
@@ -209,8 +216,16 @@ public class LSMActivity extends AppCompatActivity {
 
     }
 
-    public void saveBitmap(Bitmap bm, final String fileName) {
-        File f = new File(dir, fileName);
+    public void saveBitmap(Bitmap bm,LSM model,int index ) {
+        Date date=CommonUtil.stringToDate(model.getTime(),FORMAT_DATE_All);
+        String timeStr=CommonUtil.dateToString(date,FORMAT_DATE_FILE);
+        String dayStr=CommonUtil.dateToString(date,FORMAT_DATE_DIR);
+        String fileName=timeStr+"_" + index + ".png";
+        String dirName=dir+File.separator+dayStr;
+        if (!new File(dirName).exists()){
+            new File(dirName).mkdirs();
+        }
+        File f = new File(dirName, fileName);
         if (f.exists()) {
             f.delete();
         }

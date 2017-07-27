@@ -42,7 +42,7 @@ public class MM131Adapter extends RecyclerView.Adapter<MM131Adapter.ViewHolder> 
         MM131 model = dataArr.get(position);
         String url = "http://img1.mm131.com/pic/" + dataArr.get(position).getArrarId() + "/1.jpg";
         Glide.with(context).load(url).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
-        holder.tvTitle.setText(model.getTitle());
+        holder.tvTitle.setText("["+(position+1)+"]  "+model.getTitle());
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));
         holder.tvCount.setText(String.valueOf(model.getCount()));
         holder.tvDownnum.setText(String.valueOf(model.getDownNum()));

@@ -40,7 +40,7 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         LSM model = dataArr.get(position);
         Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
-        holder.tvTitle.setText(model.getTitle());
+        holder.tvTitle.setText("["+(position+1)+"]  "+model.getTitle());
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));
         holder.tvCount.setText(String.valueOf(model.getCount()));
         holder.tvDownnum.setText(String.valueOf(model.getDownNum()));
