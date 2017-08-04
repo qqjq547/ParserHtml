@@ -70,6 +70,8 @@ public class LSMActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lsm);
         ButterKnife.bind(this);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (!new File(dir).exists()) {
             new File(dir).mkdir();
         }
@@ -80,6 +82,7 @@ public class LSMActivity extends AppCompatActivity {
         rvList.setAdapter(adapter);
 
     }
+
 
     public void startDown() {
         LSM model=dataArr.get(0);
