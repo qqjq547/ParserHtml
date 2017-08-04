@@ -18,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnLsm;
     @BindView(R.id.btn_mm131)
     Button btnMm131;
+    @BindView(R.id.btn_web)
+    Button btnWeb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +29,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @OnClick({R.id.btn_lsm, R.id.btn_mm131})
+    @OnClick({R.id.btn_lsm, R.id.btn_mm131,R.id.btn_web})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_lsm:
-                startActivity(new Intent(this,LSMActivity.class));
+                startActivity(new Intent(this, LSMActivity.class));
                 break;
             case R.id.btn_mm131:
-                startActivity(new Intent(this,MM131Activity.class));
+                startActivity(new Intent(this, MM131Activity.class));
+                break;
+            case R.id.btn_web:
+                startActivity(new Intent(this, WebActivity.class));
                 break;
         }
     }

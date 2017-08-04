@@ -34,7 +34,7 @@ public class MM131Adapter extends RecyclerView.Adapter<MM131Adapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_lsm,parent,false));
+        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_mm131,parent,false));
     }
 
     @Override

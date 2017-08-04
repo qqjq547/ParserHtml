@@ -1,11 +1,17 @@
 package com.hjq.parserhtml.http.retrofit;
 
+import android.util.Log;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -26,8 +32,17 @@ public class ApiClient2 {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         //设置 Debug Log 模式
         builder.addInterceptor(loggingInterceptor);
-
-
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Referer", "http://www.lesmao.com/")
+                        .method(original.method(), original.body());
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        });
         //设置超时
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);
@@ -35,7 +50,6 @@ public class ApiClient2 {
         //错误重连
         builder.retryOnConnectionFailure(true);
         builder.hostnameVerifier(new HostnameVerifier() {
-
             @Override
             public boolean verify(String hostname, SSLSession session) {
                 //强行返回true 即验证成功

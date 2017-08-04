@@ -137,7 +137,7 @@ public class MM131Activity extends AppCompatActivity {
             @Override
             public void onSuccess(Bitmap data) {
                 MM131 model = dataArr.get(position);
-                saveBitmap(data, model.getArrarId() + "_" + index + ".png");
+                saveBitmap(data, model.getArrarId() + "_" + index + ".jpg");
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyItemChanged(position);
             }
@@ -163,11 +163,12 @@ public class MM131Activity extends AppCompatActivity {
     public void saveBitmap(Bitmap bm, final String fileName) {
         File f = new File(dir, fileName);
         if (f.exists()) {
-            f.delete();
+            Log.i("hjq", "已经存在:" + f.getAbsolutePath());
+            return;
         }
         try {
             FileOutputStream out = new FileOutputStream(f);
-            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.flush();
             out.close();
             Log.i("hjq", "已经保存:" + f.getAbsolutePath());

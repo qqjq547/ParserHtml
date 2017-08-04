@@ -23,7 +23,6 @@ import com.hjq.parserhtml.adapter.LSMAdapter;
 import com.hjq.parserhtml.R;
 import com.hjq.parserhtml.RxUtil;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
-import com.hjq.parserhtml.http.retrofit.ApiClient;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
 import com.hjq.parserhtml.model.LSM;
 
@@ -186,7 +185,7 @@ public class LSMActivity extends AppCompatActivity {
 
     public void downPic(final int position, final int index,String url) {
         Log.d("hjq","downUrl="+url);
-        addSubscription(RxUtil.createCompressBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
+        addSubscription(RxUtil.createCompressBmpObservable(ApiClient2.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 LSM model = dataArr.get(position);
@@ -220,7 +219,7 @@ public class LSMActivity extends AppCompatActivity {
         Date date=CommonUtil.stringToDate(model.getTime(),FORMAT_DATE_All);
         String timeStr=CommonUtil.dateToString(date,FORMAT_DATE_FILE);
         String dayStr=CommonUtil.dateToString(date,FORMAT_DATE_DIR);
-        String fileName=timeStr+"_" + index + ".png";
+        String fileName=timeStr+"_" + index + ".jpg";
         String dirName=dir+File.separator+dayStr;
         if (!new File(dirName).exists()){
             new File(dirName).mkdirs();
@@ -231,7 +230,7 @@ public class LSMActivity extends AppCompatActivity {
         }
         try {
             FileOutputStream out = new FileOutputStream(f);
-            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.flush();
             out.close();
             Log.i("hjq", "已经保存:" + f.getAbsolutePath());

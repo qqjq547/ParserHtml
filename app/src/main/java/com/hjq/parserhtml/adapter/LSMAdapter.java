@@ -5,11 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 import com.hjq.parserhtml.R;
 import com.hjq.parserhtml.model.LSM;
 
@@ -39,7 +40,11 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         LSM model = dataArr.get(position);
-        Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
+        GlideUrl glideUrl = new GlideUrl(model.getThumb(), new LazyHeaders.Builder()
+                .addHeader("Referer", "http://www.lesmao.com/")
+                .build());
+        Glide.with(context).load(glideUrl).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
+//        Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
         holder.tvTitle.setText("["+(position+1)+"]  "+model.getTitle());
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));
         holder.tvCount.setText(String.valueOf(model.getCount()));
