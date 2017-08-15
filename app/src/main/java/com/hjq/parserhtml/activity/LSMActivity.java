@@ -12,6 +12,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -25,6 +28,7 @@ import com.hjq.parserhtml.RxUtil;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
 import com.hjq.parserhtml.model.LSM;
+import com.hjq.parserhtml.model.WLSM;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,9 +65,12 @@ public class LSMActivity extends AppCompatActivity {
     Button btnGet;
     @BindView(R.id.btn_down)
     Button btnDown;
-    @BindView(R.id.tv_total)
-    TextView tvTotal;
+    @BindView(R.id.wv_content)
+    WebView wvContent;
     private CompositeSubscription mCompositeSubscription;
+    String curUrl="";
+    int curPos=0;
+    int curPage=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +87,24 @@ public class LSMActivity extends AppCompatActivity {
         rvList.setItemAnimator(new DefaultItemAnimator());
         adapter = new LSMAdapter(this,dataArr);
         rvList.setAdapter(adapter);
+        wvContent.getSettings().setJavaScriptEnabled(true);
+        wvContent.getSettings().setBlockNetworkImage(true);
+        wvContent.addJavascriptInterface(new Handler(),"handler");
+        wvContent.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                curUrl=url;
+                view.loadUrl("javascript:window.handler.show(document.body.innerHTML);");
+                super.onPageFinished(view, url);
+
+            }
+        });
 
     }
 
@@ -108,58 +133,48 @@ public class LSMActivity extends AppCompatActivity {
         }
         mCompositeSubscription.add(subscription);
     }
-    public void getPageData(final int pageNum,final  int start,final int count) {
-        addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getPageData(pageNum)).subscribe(new ApiCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
-                String[] textArr=data.split(tag);
-                List<String> urlArr=new ArrayList<String>();
-                for (int i=start;i<end+1;i++){
-                    int typeid=Integer.parseInt(textArr[i].split("-")[0]);
-                    String title=textArr[i].split("alt=\"")[1].split("\" />")[0];
-                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
-                    dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
-                }
-                adapter.notifyDataSetChanged();
-                for (int i=0;i<dataArr.size();i++){
-                    getSize(i,dataArr.get(i).getArrarId(),1);
-                }
-            }
-
-            @Override
-            public void onFailure(String exception) {
-
-            }
-
-            @Override
-            public void onFinish() {
-
-            }
-        }));
+    public void getPageData(final int pageNum,final  int start,final int end) {
+        this.pageNum=pageNum;
+        this.start=start;
+        this.end=end;
+        String format="http://www.lesmao.com/portal.php?page=%d&mobile=no";
+        wvContent.loadUrl(String.format(format,pageNum));
+//        addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getPageData(pageNum)).subscribe(new ApiCallback<String>() {
+//            @Override
+//            public void onSuccess(String data) {
+//                String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
+//                String[] textArr=data.split(tag);
+//                List<String> urlArr=new ArrayList<String>();
+//                for (int i=start;i<end+1;i++){
+//                    int typeid=Integer.parseInt(textArr[i].split("-")[0]);
+//                    String title=textArr[i].split("alt=\"")[1].split("\" />")[0];
+//                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
+//                    dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
+//                }
+//                adapter.notifyDataSetChanged();
+//                for (int i=0;i<dataArr.size();i++){
+//                    getSize(i,dataArr.get(i).getArrarId(),1);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(String exception) {
+//
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//
+//            }
+//        }));
 
     }
-
-    public void getSize(final int position, final int id, final int page) {
-        addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getSize2(id,page)).subscribe(new ApiCallback<String>() {
+   public void getTime(final int position,final int id){
+            addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getSize2(id,1)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
-                String tag = "\" /></a></li>";
-                String[] textArr=data.split(tag);
-                List<String> urlArr=new ArrayList<String>();
                 String time=data.split("<em>")[1].split("</em>")[0];
-                for (int i=0;i<textArr.length-1;i++){
-                    String[] srcArr=textArr[i].split("src=\"");
-                    String url=srcArr[srcArr.length-1];
-                    Log.d("hjq", "url=" + url);
-                    String reg="(?i).+?\\.(jpg|png|jpeg)";
-                    if (url.matches(reg)) {
-                        urlArr.add(url);
-                    }
-                }
                 LSM model2=dataArr.get(position);
-                model2.setCount(model2.getCount()+urlArr.size());
-                model2.getUrlArr().addAll(urlArr);
                 model2.setTime(time);
                 adapter.notifyItemChanged(position);
             }
@@ -171,19 +186,14 @@ public class LSMActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                if (page < 5) {
-                    getSize(position,id,page + 1);
-                } else {
-//                    int count=0;
-//                    for (LSM mm:dataArr){
-//                        count=count+mm.getCount();
-//                    }
-//                    tvTotal.setText("共"+count+"个文件");
-                }
-
             }
         }));
-
+   }
+    public void getSize(final int position, final int id, final int page) {
+        String format="http://www.lesmao.com/thread-%d-%d-1.html";
+        curPos=position;
+        curPage=page;
+        wvContent.loadUrl(String.format(format,id,page));
     }
 
     public void downPic(final int position, final int index,String url) {
@@ -222,7 +232,7 @@ public class LSMActivity extends AppCompatActivity {
         Date date=CommonUtil.stringToDate(model.getTime(),FORMAT_DATE_All);
         String timeStr=CommonUtil.dateToString(date,FORMAT_DATE_FILE);
         String dayStr=CommonUtil.dateToString(date,FORMAT_DATE_DIR);
-        String fileName=timeStr+"_" + index + ".jpg";
+        String fileName=timeStr+"_" + CommonUtil.unitFormat(index) + ".jpg";
         String dirName=dir+File.separator+dayStr;
         if (!new File(dirName).exists()){
             new File(dirName).mkdirs();
@@ -265,7 +275,6 @@ public class LSMActivity extends AppCompatActivity {
                         return;
                     }
                     getPageData(pageNum,start,end);
-
                 }
                 break;
             case R.id.btn_down:
@@ -274,7 +283,67 @@ public class LSMActivity extends AppCompatActivity {
         }
 
     }
+    class Handler {
+        @JavascriptInterface
+        public void show(String data) {
+            Log.e("hjq","curUrl="+curUrl);
+            if (curUrl.startsWith("http://www.lesmao.com/portal.php")){
+                String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
+                String[] textArr=data.split(tag);
+                List<String> urlArr=new ArrayList<String>();
+                for (int i=start;i<end+1;i++){
+                    int typeid=Integer.parseInt(textArr[i].split("-")[0]);
+                    String title=textArr[i].split("alt=\"")[1].split("\"")[0];
+                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
+                    dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
+                    getTime(dataArr.size()-1,typeid);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                        getSize(0,dataArr.get(0).getArrarId(),1);
+                    }
+                });
 
+            }else if(curUrl.startsWith("http://www.lesmao.com/thread")){
+                String tag = "<li><img alt=";
+                String[] textArr=data.split(tag);
+                List<String> urlArr=new ArrayList<String>();
+                String time=data.split("<em>")[1].split("</em>")[0];
+                String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
+                final int totalPage=Integer.parseInt(pagestr);
+                Log.d("hjq","totalPage="+totalPage);
+                for (int i=0;i<textArr.length;i++){
+                    String url=textArr[i].split("\"")[3];
+                    Log.d("hjq", "url=" + url);
+                    String reg="(?i).+?\\.(jpg|png|jpeg)";
+                    if (url.matches(reg)) {
+                        urlArr.add(url);
+                    }
+                }
+                final LSM model2=dataArr.get(curPos);
+                model2.setCount(model2.getCount()+urlArr.size());
+                model2.getUrlArr().addAll(urlArr);
+                model2.setTime(time);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyItemChanged(curPos);
+                        if (curPage<totalPage){
+                            getSize(curPos,model2.getArrarId(),curPage+1);
+                        }else{
+                            if (curPos<(end-start)) {
+                                getSize(curPos+1, dataArr.get(curPos+1).getArrarId(), 1);
+                            }
+                        }
+                    }
+                });
+
+            }
+
+        }
+    }
     @Override
     protected void onDestroy() {
         onUnsubscribe();

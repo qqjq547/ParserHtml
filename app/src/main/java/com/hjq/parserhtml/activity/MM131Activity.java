@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hjq.parserhtml.CommonUtil;
 import com.hjq.parserhtml.adapter.LSMAdapter;
 import com.hjq.parserhtml.adapter.MM131Adapter;
 import com.hjq.parserhtml.R;
@@ -144,12 +145,12 @@ public class MM131Activity extends AppCompatActivity {
     }
 
     public void downPic(final int position, final int index) {
-        String url = "http://img1.mm131.com/pic/" + dataArr.get(position).getArrarId() + "/" + index + ".jpg";
+        String url = "http://img1.mm131.com/pic/" + dataArr.get(position).getArrarId() + "/" +index+ ".jpg";
         addSubscription(RxUtil.createBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 MM131 model = dataArr.get(position);
-                saveBitmap(data, model.getArrarId() + "_" + index + ".jpg");
+                saveBitmap(data, model.getArrarId() + "_" + CommonUtil.unitFormat(index) + ".jpg");
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyItemChanged(position);
             }
