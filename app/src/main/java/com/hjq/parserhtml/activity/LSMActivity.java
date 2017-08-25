@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -77,8 +78,6 @@ public class LSMActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lsm);
         ButterKnife.bind(this);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (!new File(dir).exists()) {
             new File(dir).mkdir();
         }
@@ -239,7 +238,14 @@ public class LSMActivity extends AppCompatActivity {
         }
         File f = new File(dirName, fileName);
         if (f.exists()) {
-            f.delete();
+//            f.delete();
+            Calendar calendar=Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.add(Calendar.SECOND,-1);
+            String dateStr= CommonUtil.dateToString(calendar.getTime(),FORMAT_DATE_All);
+            model.setTime(dateStr);
+            saveBitmap(bm,model,index);
+            return;
         }
         try {
             FileOutputStream out = new FileOutputStream(f);
@@ -311,8 +317,11 @@ public class LSMActivity extends AppCompatActivity {
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 String time=data.split("<em>")[1].split("</em>")[0];
-                String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
-                final int totalPage=Integer.parseInt(pagestr);
+                int totalPage=1;
+                if (data.split("<span title=\"共 ").length>1){
+                    String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
+                    totalPage=Integer.parseInt(pagestr);
+                }
                 Log.d("hjq","totalPage="+totalPage);
                 for (int i=0;i<textArr.length;i++){
                     String url=textArr[i].split("\"")[3];
@@ -326,11 +335,12 @@ public class LSMActivity extends AppCompatActivity {
                 model2.setCount(model2.getCount()+urlArr.size());
                 model2.getUrlArr().addAll(urlArr);
                 model2.setTime(time);
+                final int finalTotalPage = totalPage;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         adapter.notifyItemChanged(curPos);
-                        if (curPage<totalPage){
+                        if (curPage< finalTotalPage){
                             getSize(curPos,model2.getArrarId(),curPage+1);
                         }else{
                             if (curPos<(end-start)) {

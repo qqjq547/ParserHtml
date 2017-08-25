@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ParserHtml</string>
+    <string-array name="mm131_type_value">
+        <item>xinggan</item>
+        <item>chemo</item>
+        <item>qingchun</item>
+        <item>xiaohua</item>
+        <item>qipao</item>
+        <item>mingxing</item>
+    </string-array>
 </resources>

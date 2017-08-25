@@ -39,6 +39,7 @@ import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
 public class MM131Activity extends AppCompatActivity {
+    String type;
     String dir = Environment.getExternalStorageDirectory() + File.separator + "mm131" + File.separator;
     ArrayList<MM131> dataArr = new ArrayList<>();
 
@@ -64,10 +65,9 @@ public class MM131Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mm131);
         ButterKnife.bind(this);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        type=getIntent().getStringExtra("type");
         if (!new File(dir).exists()) {
-            new File(dir).mkdir();
+            new File(dir).mkdirs();
         }
         rvList.setLayoutManager(new LinearLayoutManager(this));
         rvList.addItemDecoration(new DividerItemDecoration(this, OrientationHelper.VERTICAL));
@@ -104,7 +104,7 @@ public class MM131Activity extends AppCompatActivity {
     }
 
     public void getSize(final int id) {
-        addSubscription(RxUtil.createHttpObservable(ApiClient.getInstance1().getApiStores1().getSize(id)).subscribe(new ApiCallback<String>() {
+        addSubscription(RxUtil.createHttpObservable(ApiClient.getInstance1().getApiStores1().getSize(type,id)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
                 String tag = "<span class=\"rw\">1/";
@@ -209,6 +209,10 @@ public class MM131Activity extends AppCompatActivity {
                     if (start>end) {
                         Toast.makeText(this, "大小不一致", Toast.LENGTH_SHORT).show();
                     }else{
+                        dir=dir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
+                        if (!new File(dir).exists()) {
+                            new File(dir).mkdirs();
+                        }
                         getSize(start);
                     }
                 }

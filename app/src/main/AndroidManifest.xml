@@ -20,8 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.LSMActivity"/>
-        <activity android:name=".activity.MM131Activity"/>
+        <activity android:name=".activity.LSMActivity"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <activity android:name=".activity.MM131Activity"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
         <activity android:name=".activity.WebActivity"/>
 
     </application>

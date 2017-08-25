@@ -28,8 +28,8 @@ public interface ApiStores {
      *
      * @return
      */
-    @GET("xinggan/{id}.html")
-    Observable<String> getSize(@Path("id") int id);
+    @GET("{type}/{id}.html")
+    Observable<String> getSize(@Path("type") String type,@Path("id") int id);
     @GET
     Observable<ResponseBody> downloadPicFromNet(@Url String fileUrl);
 
