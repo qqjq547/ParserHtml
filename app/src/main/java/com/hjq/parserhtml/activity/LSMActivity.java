@@ -201,10 +201,9 @@ public class LSMActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Bitmap data) {
                 LSM model = dataArr.get(position);
-                saveBitmap(data, model,index);
+                saveBitmap(data, model,index,position);
                 model.setDownNum(model.getDownNum() + 1);
                 adapter.notifyItemChanged(position);
-
             }
 
             @Override
@@ -219,16 +218,35 @@ public class LSMActivity extends AppCompatActivity {
                     downPic(position, index + 1,model.getUrlArr().get(index));
                 }else{
                     if (position<(dataArr.size()-1)) {
-                        downPic(position + 1, 1, dataArr.get(position+1).getUrlArr().get(0));
+                        int curpos=nextPosition(position);
+                        downPic(curpos, 1, dataArr.get(curpos).getUrlArr().get(0));
                     }
                 }
             }
         }));
 
     }
+    public int nextPosition(int position){
+        if (dataArr.get(position+1).getUrlArr().size()>0){
+            return position+1;
+        }else {
+            if (position<(dataArr.size()-1)) {
+                return nextPosition(position+1);
+            }else {
+                return position+1;
+            }
+        }
+    }
 
-    public void saveBitmap(Bitmap bm,LSM model,int index ) {
+    public void saveBitmap(Bitmap bm,LSM model,int index,int position ) {
         Date date=CommonUtil.stringToDate(model.getTime(),FORMAT_DATE_All);
+        if (date==null){
+            if (position>1){
+                model.setTime(dealTime(dataArr.get(position-1).getTime(),false));
+            }else{
+                model.setTime(dealTime(dataArr.get(position+1).getTime(),true));
+            }
+        }
         String timeStr=CommonUtil.dateToString(date,FORMAT_DATE_FILE);
         String dayStr=CommonUtil.dateToString(date,FORMAT_DATE_DIR);
         String fileName=timeStr+"_" + CommonUtil.unitFormat(index) + ".jpg";
@@ -239,12 +257,8 @@ public class LSMActivity extends AppCompatActivity {
         File f = new File(dirName, fileName);
         if (f.exists()) {
 //            f.delete();
-            Calendar calendar=Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.add(Calendar.SECOND,-1);
-            String dateStr= CommonUtil.dateToString(calendar.getTime(),FORMAT_DATE_All);
-            model.setTime(dateStr);
-            saveBitmap(bm,model,index);
+            model.setTime(dealTime(model.getTime(),false));
+            saveBitmap(bm,model,index,position);
             return;
         }
         try {
@@ -261,6 +275,13 @@ public class LSMActivity extends AppCompatActivity {
             bm.recycle();
             bm=null;
         }
+    }
+    public String dealTime(String dateStr,boolean add){
+        Date date=CommonUtil.stringToDate(dateStr,FORMAT_DATE_All);
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.SECOND,add?1:-1);
+        return CommonUtil.dateToString(calendar.getTime(),FORMAT_DATE_All);
     }
 
     @OnClick({R.id.btn_get, R.id.btn_down})
@@ -332,9 +353,30 @@ public class LSMActivity extends AppCompatActivity {
                     }
                 }
                 final LSM model2=dataArr.get(curPos);
+                if (model2.getCount()==0){
+                    Date date=CommonUtil.stringToDate(time,FORMAT_DATE_All);
+                    if (date==null){
+                        if (curPos>0) {
+                            time = dealTime(dataArr.get(curPos - 1).getTime(), false);
+                        }else{
+                            time = "";
+                        }
+                    }else{
+                        if(curPos>0&&TextUtils.isEmpty(dataArr.get(curPos - 1).getTime())){
+                            String preTime = dealTime(time, true);
+                            dataArr.get(curPos -1).setTime(preTime);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyItemChanged(curPos-1);
+                                }
+                            });
+                        }
+                    }
+                    model2.setTime(time);
+                }
                 model2.setCount(model2.getCount()+urlArr.size());
                 model2.getUrlArr().addAll(urlArr);
-                model2.setTime(time);
                 final int finalTotalPage = totalPage;
                 runOnUiThread(new Runnable() {
                     @Override
@@ -344,7 +386,7 @@ public class LSMActivity extends AppCompatActivity {
                             getSize(curPos,model2.getArrarId(),curPage+1);
                         }else{
                             if (curPos<(end-start)) {
-                                getSize(curPos+1, dataArr.get(curPos+1).getArrarId(), 1);
+                               getSize(curPos + 1, dataArr.get(curPos + 1).getArrarId(), 1);
                             }
                         }
                     }
