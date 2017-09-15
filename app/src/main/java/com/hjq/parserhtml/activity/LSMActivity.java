@@ -17,8 +17,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hjq.parserhtml.CommonUtil;
@@ -28,11 +26,9 @@ import com.hjq.parserhtml.RxUtil;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
 import com.hjq.parserhtml.model.LSM;
-import com.hjq.parserhtml.model.WLSM;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -108,9 +104,13 @@ public class LSMActivity extends AppCompatActivity {
     }
 
 
-    public void startDown() {
-        LSM model=dataArr.get(0);
-        downPic(0, 1, model.getUrlArr().get(0));
+    public void startDown(int curPos) {
+        LSM model=dataArr.get(curPos);
+        if (model.getUrlArr().size()>0) {
+            downPic(curPos, 1, model.getUrlArr().get(0));
+        }else {
+            startDown(curPos+1);
+        }
 //        for (int i=0;i<dataArr.size();i++) {
 //            LSM model=dataArr.get(i);
 //            downPic(i,model.getArrarId(), 1, model.getUrlArr().get(0));
@@ -168,7 +168,7 @@ public class LSMActivity extends AppCompatActivity {
 //        }));
 
     }
-   public void getTime(final int position,final int id){
+   public void getNextTime(final int position, final int id){
             addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getSize2(id,1)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -237,14 +237,20 @@ public class LSMActivity extends AppCompatActivity {
             }
         }
     }
-
+   public String getNextTime(int position){
+       if (CommonUtil.stringToDate(dataArr.get(position+1).getTime(),FORMAT_DATE_All)==null){
+          return getNextTime(position+1);
+       }else{
+           return dealTime(dataArr.get(position+1).getTime(),true);
+       }
+   }
     public void saveBitmap(Bitmap bm,LSM model,int index,int position ) {
         Date date=CommonUtil.stringToDate(model.getTime(),FORMAT_DATE_All);
         if (date==null){
             if (position>1){
                 model.setTime(dealTime(dataArr.get(position-1).getTime(),false));
             }else{
-                model.setTime(dealTime(dataArr.get(position+1).getTime(),true));
+                model.setTime(getNextTime(position));
             }
         }
         String timeStr=CommonUtil.dateToString(date,FORMAT_DATE_FILE);
@@ -305,7 +311,7 @@ public class LSMActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.btn_down:
-                startDown();
+                startDown(0);
                 break;
         }
 
@@ -318,12 +324,22 @@ public class LSMActivity extends AppCompatActivity {
                 String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
+                if(textArr.length<end){
+                    end=textArr.length-1;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            evEnd.setText(""+end);
+                            Toast.makeText(LSMActivity.this,"调整end",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
                 for (int i=start;i<end+1;i++){
                     int typeid=Integer.parseInt(textArr[i].split("-")[0]);
                     String title=textArr[i].split("alt=\"")[1].split("\"")[0];
                     String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
                     dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
-                    getTime(dataArr.size()-1,typeid);
+                    getNextTime(dataArr.size()-1,typeid);
                 }
                 runOnUiThread(new Runnable() {
                     @Override
@@ -343,12 +359,12 @@ public class LSMActivity extends AppCompatActivity {
                     String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
                     totalPage=Integer.parseInt(pagestr);
                 }
-                Log.d("hjq","totalPage="+totalPage);
+                Log.e("hjq","position="+curPos+",totalPage="+totalPage);
                 for (int i=0;i<textArr.length;i++){
                     String url=textArr[i].split("\"")[3];
-                    Log.d("hjq", "url=" + url);
                     String reg="(?i).+?\\.(jpg|png|jpeg)";
                     if (url.matches(reg)) {
+                        Log.d("hjq", "url=" + url);
                         urlArr.add(url);
                     }
                 }
@@ -359,7 +375,7 @@ public class LSMActivity extends AppCompatActivity {
                         if (curPos>0) {
                             time = dealTime(dataArr.get(curPos - 1).getTime(), false);
                         }else{
-                            time = "";
+                            time = getNextTime(curPos);
                         }
                     }else{
                         if(curPos>0&&TextUtils.isEmpty(dataArr.get(curPos - 1).getTime())){

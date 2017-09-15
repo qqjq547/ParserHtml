@@ -197,10 +197,10 @@ public class MM131Activity extends AppCompatActivity {
 
     @OnClick({R.id.btn_get, R.id.btn_down})
     public void onViewClicked(View view) {
+        String startStr = evStart.getText().toString().trim();
+        String endStr = evEnd.getText().toString().trim();
         switch (view.getId()) {
             case R.id.btn_get:
-                String startStr = evStart.getText().toString().trim();
-                String endStr = evEnd.getText().toString().trim();
                 if (TextUtils.isEmpty(startStr) || TextUtils.isEmpty(endStr)) {
                     Toast.makeText(this, "内容不能为空", Toast.LENGTH_SHORT).show();
                 } else {
@@ -209,15 +209,15 @@ public class MM131Activity extends AppCompatActivity {
                     if (start>end) {
                         Toast.makeText(this, "大小不一致", Toast.LENGTH_SHORT).show();
                     }else{
-                        dir=dir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
-                        if (!new File(dir).exists()) {
-                            new File(dir).mkdirs();
-                        }
                         getSize(start);
                     }
                 }
                 break;
             case R.id.btn_down:
+                dir=dir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
+                if (!new File(dir).exists()) {
+                    new File(dir).mkdirs();
+                }
                 startDown();
                 break;
         }

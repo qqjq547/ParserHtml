@@ -81,7 +81,7 @@ public class WebActivity extends AppCompatActivity {
                 curUrl=url;
             }
         });
-        wvLsm.loadUrl("http://www.lesmao.com/portal.php?page=1&mobile=no");
+        wvLsm.loadUrl("http://www.lesmao.com/portal.php?page=143&mobile=no");
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
