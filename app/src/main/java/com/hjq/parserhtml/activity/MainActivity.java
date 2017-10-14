@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         spinner.setSelection(0);
-
     }
 
     @OnClick({R.id.btn_lsm, R.id.btn_mm131, R.id.btn_web})
