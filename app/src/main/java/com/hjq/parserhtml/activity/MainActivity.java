@@ -3,6 +3,7 @@ package com.hjq.parserhtml.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         spinner.setSelection(0);
+        Log.d("tag","jjhaja");
     }
 
     @OnClick({R.id.btn_lsm, R.id.btn_mm131, R.id.btn_web})
