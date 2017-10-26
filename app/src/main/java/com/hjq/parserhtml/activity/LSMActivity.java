@@ -100,7 +100,6 @@ public class LSMActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
 
@@ -172,7 +171,7 @@ public class LSMActivity extends AppCompatActivity {
             addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getSize2(id,1)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
-                String time=data.split("<em>")[1].split("</em>")[0];
+                String time=data.split("<em>")[4].split("</em>")[0];
                 LSM model2=dataArr.get(position);
                 model2.setTime(time);
                 adapter.notifyItemChanged(position);
@@ -321,7 +320,7 @@ public class LSMActivity extends AppCompatActivity {
         public void show(String data) {
             Log.e("hjq","curUrl="+curUrl);
             if (curUrl.startsWith("http://www.lesmao.com/portal.php")){
-                String tag = "<div class=\"photo\"><a href=\"http://www.lesmao.com/thread-";
+                String tag = "<div class=\"photo\"><a href=\"thread-";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 if(textArr.length<end){
