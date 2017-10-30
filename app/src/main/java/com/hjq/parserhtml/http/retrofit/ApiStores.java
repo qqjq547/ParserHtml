@@ -33,6 +33,7 @@ public interface ApiStores {
     @GET
     Observable<ResponseBody> downloadPicFromNet(@Url String fileUrl);
 
+
     /**
      * 原图
      * @param mod

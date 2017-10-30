@@ -32,8 +32,18 @@ public class ApiClient {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         //设置 Debug Log 模式
         builder.addInterceptor(loggingInterceptor);
-
-
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Referer", "http://m.mm131.com/xinggan/3300.html")
+                        .header("Host", "img1.mm131.com")
+                        .method(original.method(), original.body());
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        });
         //设置超时
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);
@@ -65,6 +75,7 @@ public class ApiClient {
             //设置 Debug Log 模式
             builder.addInterceptor(loggingInterceptor);
         //设置超时
+        
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);
         builder.writeTimeout(20, TimeUnit.SECONDS);

@@ -13,6 +13,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -42,7 +45,8 @@ public class MM131Activity extends AppCompatActivity {
     String type;
     String dir = Environment.getExternalStorageDirectory() + File.separator + "mm131" + File.separator;
     ArrayList<MM131> dataArr = new ArrayList<>();
-
+    @BindView(R.id.wv_content)
+    WebView wvContent;
     @BindView(R.id.rv_list)
     RecyclerView rvList;
     MM131Adapter adapter;
@@ -59,6 +63,9 @@ public class MM131Activity extends AppCompatActivity {
     @BindView(R.id.tv_total)
     TextView tvTotal;
     private CompositeSubscription mCompositeSubscription;
+    String curUrl;
+    int curPos;
+    int index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,30 @@ public class MM131Activity extends AppCompatActivity {
         if (!new File(dir).exists()) {
             new File(dir).mkdirs();
         }
+        wvContent.getSettings().setJavaScriptEnabled(true);
+        wvContent.getSettings().setBlockNetworkImage(true);
+        wvContent.addJavascriptInterface(new MM131Activity.Handler(),"handler");
+        wvContent.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                downPic(curPos, index);
+                 if (index < dataArr.get(curPos).getCount()) {
+                     loadUrl(curPos, index + 1);
+                }else{
+                    if (curPos<(dataArr.size()-1)) {
+                        loadUrl(curPos+1, 1);
+                    }
+                }
+             
+            }
+        });
         rvList.setLayoutManager(new LinearLayoutManager(this));
         rvList.addItemDecoration(new DividerItemDecoration(this, OrientationHelper.VERTICAL));
         rvList.setItemAnimator(new DefaultItemAnimator());
@@ -86,9 +117,6 @@ public class MM131Activity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startDown() {
-        downPic(0, 1);
-    }
 
     public void onUnsubscribe() {
         if (mCompositeSubscription != null && mCompositeSubscription.hasSubscriptions()) {
@@ -162,13 +190,13 @@ public class MM131Activity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                if (index < dataArr.get(position).getCount()) {
-                    downPic(position, index + 1);
-                }else{
-                    if (position<(dataArr.size()-1)) {
-                        downPic(position+1, 1);
-                    }
-                }
+//                if (index < dataArr.get(position).getCount()) {
+//                    downPic(position, index + 1);
+//                }else{
+//                    if (position<(dataArr.size()-1)) {
+//                        downPic(position+1, 1);
+//                    }
+//                }
             }
         }));
 
@@ -218,15 +246,32 @@ public class MM131Activity extends AppCompatActivity {
                 if (!new File(dir).exists()) {
                     new File(dir).mkdirs();
                 }
-                startDown();
+                loadUrl(0,1);
                 break;
         }
 
+    }
+    public void loadUrl(int pos,int index){
+        MM131 model = dataArr.get(pos);
+        this.curPos=pos;
+        this.index=index;
+        if (index>1) {
+            wvContent.loadUrl("http://m.mm131.com/" + type + "/" + model.getArrarId() + "_" + index + ".html");
+        }else {
+            wvContent.loadUrl("http://m.mm131.com/" + type + "/" + model.getArrarId()  + ".html");
+        }
     }
 
     @Override
     protected void onDestroy() {
         onUnsubscribe();
         super.onDestroy();
+    }
+
+    public class Handler {
+        @JavascriptInterface
+        public void show(String data) {
+            
+        }
     }
 }

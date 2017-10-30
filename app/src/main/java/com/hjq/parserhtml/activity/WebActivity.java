@@ -82,6 +82,8 @@ public class WebActivity extends AppCompatActivity {
             }
         });
         wvLsm.loadUrl("http://www.lesmao.com/portal.php?page=143&mobile=no");
+////        wvLsm.loadUrl("http://m.mm131.com/xinggan/3300_1.html");
+//        wvLsm.loadUrl("http://img1.mm131.com/pic/3300/10.jpg");
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
