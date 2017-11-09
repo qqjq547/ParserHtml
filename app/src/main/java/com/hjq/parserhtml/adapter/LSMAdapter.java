@@ -2,6 +2,7 @@ package com.hjq.parserhtml.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,10 +41,11 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         LSM model = dataArr.get(position);
-        GlideUrl glideUrl = new GlideUrl(model.getThumb(), new LazyHeaders.Builder()
-                .addHeader("Referer", "http://www.lesmao.com/")
-                .build());
-        Glide.with(context).load(glideUrl).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
+        Log.i("hjq","getThumb="+model.getThumb());
+//        GlideUrl glideUrl = new GlideUrl(model.getThumb(), new LazyHeaders.Builder()
+//                .addHeader("Referer", "http://www.lesmao.com/")
+//                .build());
+        Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
 //        Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
         holder.tvTitle.setText("["+(position+1)+"]  "+model.getTitle());
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));

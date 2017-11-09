@@ -88,12 +88,12 @@ public class LSMActivity extends AppCompatActivity {
         wvContent.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
+                return false;
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                Log.d("hjq","onPageFinished="+url);
                 curUrl=url;
                 view.loadUrl("javascript:window.handler.show(document.body.innerHTML);");
                 super.onPageFinished(view, url);
@@ -135,7 +135,7 @@ public class LSMActivity extends AppCompatActivity {
         this.pageNum=pageNum;
         this.start=start;
         this.end=end;
-        String format="http://www.lesmao.com/portal.php?page=%d&mobile=no";
+        String format="http://www.lsmpic.com/portal.php?page=%d&mobile=no";
         wvContent.loadUrl(String.format(format,pageNum));
 //        addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getPageData(pageNum)).subscribe(new ApiCallback<String>() {
 //            @Override
@@ -188,9 +188,17 @@ public class LSMActivity extends AppCompatActivity {
         }));
    }
     public void getSize(final int position, final int id, final int page) {
-        String format="http://www.lesmao.com/thread-%d-%d-1.html";
+        String format;
+        if (page>1){
+             format="http://www.lsmpic.com/thread-%d-%d-1.html";
+        }else {
+             format="http://www.lesmao.com/thread-%d-%d-1.html"; 
+        }
+//        String format="http://www.lesmao.com/thread-%d-%d-1.html";
+//        String format="http://www.lsmpic.com/thread-%d-%d-1.html";
         curPos=position;
         curPage=page;
+        Log.e("hjq","curUrl format="+String.format(format,id,page));
         wvContent.loadUrl(String.format(format,id,page));
     }
 
@@ -302,7 +310,7 @@ public class LSMActivity extends AppCompatActivity {
                     pageNum=Integer.parseInt(pageNumStr);
                     start=Integer.parseInt(startStr);
                     end=Integer.parseInt(endStr);
-                    if (end>36||start<1||start>end){
+                    if (end>40||start<1||start>end){
                         Toast.makeText(this, "内容不规范", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -318,9 +326,12 @@ public class LSMActivity extends AppCompatActivity {
     class Handler {
         @JavascriptInterface
         public void show(String data) {
-            Log.e("hjq","curUrl="+curUrl);
-            if (curUrl.startsWith("http://www.lesmao.com/portal.php")){
-                String tag = "<div class=\"photo\"><a href=\"thread-";
+            Log.d("hjq","curUrl="+curUrl);
+            if (data.length()==0){
+                return;
+            }
+            if (curUrl.startsWith("http://www.lesmao.com/portal.php")||curUrl.startsWith("http://www.lsmpic.com/portal.php")){
+                String tag = "<div class=\"photo\"><a href=\"http://www.lsmpic.com/thread-";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 if(textArr.length<end){
@@ -347,25 +358,26 @@ public class LSMActivity extends AppCompatActivity {
                         getSize(0,dataArr.get(0).getArrarId(),1);
                     }
                 });
-
-            }else if(curUrl.startsWith("http://www.lesmao.com/thread")){
+            }else if(curUrl.startsWith("http://www.lesmao.com/thread")||curUrl.startsWith("http://www.lsmpic.com/thread")){
                 String tag = "<li><img alt=";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
-                String time=data.split("<em>")[1].split("</em>")[0];
+                String time=data.split("<em>")[4].split("</em>")[0];
                 int totalPage=1;
                 if (data.split("<span title=\"共 ").length>1){
                     String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
                     totalPage=Integer.parseInt(pagestr);
                 }
-                Log.e("hjq","position="+curPos+",totalPage="+totalPage);
-                for (int i=0;i<textArr.length;i++){
+                Log.d("hjq","position="+curPos+",curPage="+curPage+",totalPage="+totalPage);
+                for (int i=1;i<textArr.length;i++){
                     String url=textArr[i].split("\"")[3];
-                    String reg="(?i).+?\\.(jpg|png|jpeg)";
-                    if (url.matches(reg)) {
-                        Log.d("hjq", "url=" + url);
-                        urlArr.add(url);
-                    }
+                    Log.d("hjq", "url=" + url);
+                    urlArr.add(url);
+//                    String reg="(?i).+?\\.(jpg|png|jpeg)";
+//                    if (url.matches(reg)) {
+//                        Log.d("hjq", "url=" + url);
+//                        urlArr.add(url);
+//                    }
                 }
                 final LSM model2=dataArr.get(curPos);
                 if (model2.getCount()==0){
@@ -389,6 +401,9 @@ public class LSMActivity extends AppCompatActivity {
                         }
                     }
                     model2.setTime(time);
+//                    if (urlArr.size()>1) {
+//                        model2.setThumb(urlArr.get(1));
+//                    }
                 }
                 model2.setCount(model2.getCount()+urlArr.size());
                 model2.getUrlArr().addAll(urlArr);
