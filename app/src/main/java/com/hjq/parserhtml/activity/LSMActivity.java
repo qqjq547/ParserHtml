@@ -68,6 +68,8 @@ public class LSMActivity extends AppCompatActivity {
     String curUrl="";
     int curPos=0;
     int curPage=0;
+    
+    String ip="http://www.lesmao.cc/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +137,7 @@ public class LSMActivity extends AppCompatActivity {
         this.pageNum=pageNum;
         this.start=start;
         this.end=end;
-        String format="http://www.lsmpic.com/portal.php?page=%d&mobile=no";
+        String format=ip+"portal.php?page=%d&mobile=no";
         wvContent.loadUrl(String.format(format,pageNum));
 //        addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getPageData(pageNum)).subscribe(new ApiCallback<String>() {
 //            @Override
@@ -188,14 +190,7 @@ public class LSMActivity extends AppCompatActivity {
         }));
    }
     public void getSize(final int position, final int id, final int page) {
-        String format;
-        if (page>1){
-             format="http://www.lsmpic.com/thread-%d-%d-1.html";
-        }else {
-             format="http://www.lesmao.com/thread-%d-%d-1.html"; 
-        }
-//        String format="http://www.lesmao.com/thread-%d-%d-1.html";
-//        String format="http://www.lsmpic.com/thread-%d-%d-1.html";
+        String format=ip+"thread-%d-%d-1.html";;
         curPos=position;
         curPage=page;
         Log.e("hjq","curUrl format="+String.format(format,id,page));
@@ -327,11 +322,12 @@ public class LSMActivity extends AppCompatActivity {
         @JavascriptInterface
         public void show(String data) {
             Log.d("hjq","curUrl="+curUrl);
+            Log.d("hjq","data="+data.length());
             if (data.length()==0){
                 return;
             }
-            if (curUrl.startsWith("http://www.lesmao.com/portal.php")||curUrl.startsWith("http://www.lsmpic.com/portal.php")){
-                String tag = "<div class=\"photo\"><a href=\"http://www.lsmpic.com/thread-";
+            if (curUrl.startsWith(ip+"portal.php")){
+                String tag = "<div class=\"photo\"><a href=\""+ip+"thread-";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 if(textArr.length<end){
@@ -358,7 +354,7 @@ public class LSMActivity extends AppCompatActivity {
                         getSize(0,dataArr.get(0).getArrarId(),1);
                     }
                 });
-            }else if(curUrl.startsWith("http://www.lesmao.com/thread")||curUrl.startsWith("http://www.lsmpic.com/thread")){
+            }else if(curUrl.startsWith(ip+"thread")){
                 String tag = "<li><img alt=";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
