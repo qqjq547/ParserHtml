@@ -69,7 +69,7 @@ public class LSMActivity extends AppCompatActivity {
     int curPos=0;
     int curPage=0;
     
-    String ip="http://www.lesmao.cc/";
+    String ip="http://www.lesmao.me/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
