@@ -69,7 +69,7 @@ public class LSMActivity extends AppCompatActivity {
     int curPos=0;
     int curPage=0;
     
-    String ip="http://www.lesmao.me/";
+    String ip="http://www.lsmpx.com/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -322,12 +322,12 @@ public class LSMActivity extends AppCompatActivity {
         @JavascriptInterface
         public void show(String data) {
             Log.d("hjq","curUrl="+curUrl);
-            Log.d("hjq","data="+data.length());
+//            Log.d("hjq","data="+data);
             if (data.length()==0){
                 return;
             }
             if (curUrl.startsWith(ip+"portal.php")){
-                String tag = "<div class=\"photo\"><a href=\""+ip+"thread-";
+                String tag = "<div class=\"photo\">";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 if(textArr.length<end){
@@ -341,7 +341,8 @@ public class LSMActivity extends AppCompatActivity {
                     });
                 }
                 for (int i=start;i<end+1;i++){
-                    int typeid=Integer.parseInt(textArr[i].split("-")[0]);
+                    String temp=textArr[i].split("tid=")[1].split("\"")[0];
+                    int typeid=Integer.parseInt(temp);
                     String title=textArr[i].split("alt=\"")[1].split("\"")[0];
                     String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
                     dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
