@@ -47,7 +47,7 @@ public class ApiClient2 {
                 Request.Builder requestBuilder = original.newBuilder()
 //                        .header("Remote address", "92.223.72.19:443")
 //                        .header("Referrer Policy", "no-referrer-when-downgrade")
-//                        .header("Referer", "92.223.72.19:443")
+                        .header("Referer", "https://www.lsmpx.com/")
 
                         .method(original.method(), original.body());
                 Request request = requestBuilder.build();

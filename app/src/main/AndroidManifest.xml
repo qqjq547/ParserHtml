@@ -3,7 +3,7 @@
     package="com.hjq.parserhtml">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.READ_SOCIAL_STREAM"/>
 
 
     <application
@@ -25,7 +25,15 @@
         <activity android:name=".activity.MM131Activity"
             android:windowSoftInputMode="stateHidden|adjustPan"/>
         <activity android:name=".activity.WebActivity"/>
-
+        <provider
+            android:name=".ImageFileProvider"
+            android:authorities="com.hjq.parserhtml.ImageFileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_path" />
+        </provider>
     </application>
 
 </manifest>

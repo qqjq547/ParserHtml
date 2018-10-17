@@ -147,7 +147,6 @@ public class MM131Activity extends AppCompatActivity {
                 model.setTime(time);
                 dataArr.add(model);
                 adapter.notifyDataSetChanged();
-                Log.d("hjq", "count=" + count);
             }
 
             @Override
@@ -244,7 +243,7 @@ public class MM131Activity extends AppCompatActivity {
             case R.id.btn_down:
                 dir=dir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
                 if (!new File(dir).exists()) {
-                    new File(dir).mkdirs();
+                    new File(dir).mkdir();
                 }
                 loadUrl(0,1);
                 break;
