@@ -1,6 +1,7 @@
 package com.hjq.parserhtml.activity;
 
 import android.graphics.Bitmap;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -69,7 +71,7 @@ public class LSMActivity extends AppCompatActivity {
     int curPos=0;
     int curPage=0;
     
-    String ip="http://www.lsmpx.com/";
+    String ip="https://www.lsmpx.com/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +101,11 @@ public class LSMActivity extends AppCompatActivity {
                 curUrl=url;
                 view.loadUrl("javascript:window.handler.show(document.body.innerHTML);");
                 super.onPageFinished(view, url);
-
+            }
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+//                super.onReceivedSslError(view, handler, error);
+                handler.proceed();
             }
         });
     }
@@ -173,10 +179,10 @@ public class LSMActivity extends AppCompatActivity {
             addSubscription(RxUtil.createHttpObservable(ApiClient2.getInstance1().getApiStores1().getSize2(id,1)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
-                String time=data.split("<em>")[4].split("</em>")[0];
-                LSM model2=dataArr.get(position);
-                model2.setTime(time);
-                adapter.notifyItemChanged(position);
+//                String time=data.split("<em>")[4].split("</em>")[0];
+//                LSM model2=dataArr.get(position);
+//                model2.setTime(time);
+//                adapter.notifyItemChanged(position);
             }
 
             @Override
@@ -341,12 +347,12 @@ public class LSMActivity extends AppCompatActivity {
                     });
                 }
                 for (int i=start;i<end+1;i++){
-                    String temp=textArr[i].split("tid=")[1].split("\"")[0];
+                    String temp=textArr[i].split("<a href=\"thread-")[1].split("-")[0];
                     int typeid=Integer.parseInt(temp);
                     String title=textArr[i].split("alt=\"")[1].split("\"")[0];
                     String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
                     dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
-                    getNextTime(dataArr.size()-1,typeid);
+//                    getNextTime(dataArr.size()-1,typeid);
                 }
                 runOnUiThread(new Runnable() {
                     @Override
@@ -356,19 +362,30 @@ public class LSMActivity extends AppCompatActivity {
                     }
                 });
             }else if(curUrl.startsWith(ip+"thread")){
-                String tag = "<li><img alt=";
+                String tag = "<li><img alt";
                 String[] textArr=data.split(tag);
                 List<String> urlArr=new ArrayList<String>();
                 String time=data.split("<em>")[4].split("</em>")[0];
+                final LSM model2=dataArr.get(curPos);
+                model2.setTime(time);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyItemChanged(curPos);
+                    }
+                });
                 int totalPage=1;
-                if (data.split("<span title=\"共 ").length>1){
-                    String pagestr=data.split("<span title=\"共 ")[1].split(" ")[0];
-                    totalPage=Integer.parseInt(pagestr);
+                if (data.split("数量：</span>").length>1){
+                    String pagestr=data.split("数量：</span>")[1].split(" P")[0];
+                    Log.e("hjq",pagestr);
+                    int total=Integer.parseInt(pagestr);
+                    totalPage=total%4==0?total/4:total/4+1;
                 }
-                Log.d("hjq","position="+curPos+",curPage="+curPage+",totalPage="+totalPage);
+                Log.e("hjq","position="+curPos+",curPage="+curPage+",totalPage="+totalPage);
                 for (int i=1;i<textArr.length;i++){
-                    String url=textArr[i].split("\"")[3];
-                    Log.d("hjq", "url=" + url);
+//                    Log.e("hjq",textArr[i]);
+                    String url=textArr[i].split("src=\"")[1].split("\"")[0];
+                    Log.e("hjq", "url=" + url);
                     urlArr.add(url);
 //                    String reg="(?i).+?\\.(jpg|png|jpeg)";
 //                    if (url.matches(reg)) {
@@ -376,7 +393,6 @@ public class LSMActivity extends AppCompatActivity {
 //                        urlArr.add(url);
 //                    }
                 }
-                final LSM model2=dataArr.get(curPos);
                 if (model2.getCount()==0){
                     Date date=CommonUtil.stringToDate(time,FORMAT_DATE_All);
                     if (date==null){

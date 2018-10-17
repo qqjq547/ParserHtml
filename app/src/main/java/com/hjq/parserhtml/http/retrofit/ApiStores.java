@@ -48,4 +48,5 @@ public interface ApiStores {
     @GET("portal.php")
     Observable<String> getPageData(@Query("page") int page);
 
+
 }

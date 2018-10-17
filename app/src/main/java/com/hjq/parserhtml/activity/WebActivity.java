@@ -2,6 +2,7 @@ package com.hjq.parserhtml.activity;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.webkit.JavascriptInterface;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -67,7 +69,7 @@ public class WebActivity extends AppCompatActivity {
         wvLsm.getSettings().setUseWideViewPort(true);
         //设置是否出现缩放工具
         wvLsm.getSettings().setBuiltInZoomControls(true);
-        wvLsm.addJavascriptInterface(new Handler(),"handler");
+//        wvLsm.addJavascriptInterface(new Handler(),"handler");
         wvLsm.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -80,8 +82,13 @@ public class WebActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
                 curUrl=url;
             }
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+//                super.onReceivedSslError(view, handler, error);
+                handler.proceed();
+            }
         });
-        wvLsm.loadUrl("http://www.lesmao.me/portal.php?page=1&mobile=no");
+        wvLsm.loadUrl("https://www.lsmpx.com/");
 ////        wvLsm.loadUrl("http://m.mm131.com/xinggan/3300_1.html");
 //        wvLsm.loadUrl("http://img1.mm131.com/pic/3300/10.jpg");
     }

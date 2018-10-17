@@ -1,13 +1,16 @@
 package com.hjq.parserhtml.http.retrofit;
 
 import java.io.IOException;
-import java.util.List;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
-import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -50,6 +53,33 @@ public class ApiClient {
         builder.writeTimeout(20, TimeUnit.SECONDS);
         //错误重连
         builder.retryOnConnectionFailure(true);
+        X509TrustManager single=new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] chain,
+                    String authType) throws CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] chain,
+                    String authType) throws CertificateException {
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+        };
+         X509TrustManager[] trustAllCerts = new X509TrustManager[]{single};
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            javax.net.ssl.SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
+            builder.sslSocketFactory(sslSocketFactory,single);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         builder.hostnameVerifier(new HostnameVerifier() {
 
             @Override
@@ -58,6 +88,7 @@ public class ApiClient {
                 return true;
             }
         });
+
         okHttpClient = builder.build();
         Retrofit mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)

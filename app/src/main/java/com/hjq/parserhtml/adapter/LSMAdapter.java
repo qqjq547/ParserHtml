@@ -49,7 +49,7 @@ public class LSMAdapter extends RecyclerView.Adapter<LSMAdapter.ViewHolder> {
 //        Glide.with(context).load(model.getThumb()).placeholder(R.mipmap.ic_launcher_round).error(R.mipmap.ic_launcher_round).into(holder.ivAvatar);
         holder.tvTitle.setText("["+(position+1)+"]  "+model.getTitle());
         holder.tvArrayid.setText(String.valueOf(model.getArrarId()));
-        holder.tvCount.setText(String.valueOf(model.getCount()));
+        holder.tvCount.setText(String.valueOf(model.getUrlArr().size()));
         holder.tvDownnum.setText(String.valueOf(model.getDownNum()));
         holder.tvTime.setText(model.getTime());
     }
