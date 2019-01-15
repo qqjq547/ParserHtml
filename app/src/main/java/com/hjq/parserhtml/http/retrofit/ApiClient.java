@@ -41,7 +41,7 @@ public class ApiClient {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder()
                         .header("Referer", "http://m.mm131.com/xinggan/3300.html")
-                        .header("Host", "img1.mm131.com")
+                        .header("Host", "img1.mm131.me")
                         .method(original.method(), original.body());
                 Request request = requestBuilder.build();
                 return chain.proceed(request);

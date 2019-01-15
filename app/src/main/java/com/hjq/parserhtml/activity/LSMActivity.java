@@ -71,7 +71,7 @@ public class LSMActivity extends AppCompatActivity {
     int curPos=0;
     int curPage=0;
     
-    String ip="https://www.lsmpx.com/";
+    String ip="https://www.lsm.me/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,7 +205,7 @@ public class LSMActivity extends AppCompatActivity {
 
     public void downPic(final int position, final int index,String url) {
         Log.d("hjq","downUrl="+url);
-        addSubscription(RxUtil.createBmpObservable(ApiClient2.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
+        addSubscription(RxUtil.createCompressBmpObservable(ApiClient2.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 LSM model = dataArr.get(position);
