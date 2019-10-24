@@ -1,6 +1,5 @@
 package com.hjq.parserhtml.activity;
 
-import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Bundle;
@@ -21,13 +20,11 @@ import com.hjq.parserhtml.R;
 import com.hjq.parserhtml.RxUtil;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
-import com.hjq.parserhtml.model.LSM;
 import com.hjq.parserhtml.model.WLSM;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +38,7 @@ import rx.subscriptions.CompositeSubscription;
  * Created by Administrator on 2017/8/4.
  */
 
-public class WebActivity extends AppCompatActivity {
+public class Web1Activity extends AppCompatActivity {
     @BindView(R.id.wv_lsm)
     WebView wvLsm;
     String curUrl="";
@@ -81,8 +78,8 @@ public class WebActivity extends AppCompatActivity {
                 handler.proceed();
             }
         });
-        wvLsm.loadUrl("https://www.lsmpx.com/");
-////        wvLsm.loadUrl("http://m.mm131.com/xinggan/3300_1.html");
+        wvLsm.loadUrl("https://www.mm131.net/");
+////      wvLsm.loadUrl("http://m.mm131.com/xinggan/3300_1.html");
 //        wvLsm.loadUrl("http://img1.mm131.com/pic/3300/10.jpg");
     }
     @Override
@@ -102,5 +99,4 @@ public class WebActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-
 }

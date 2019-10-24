@@ -49,10 +49,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
     }
 
-    @OnClick({R.id.btn_lsm, R.id.btn_mm131, R.id.btn_web})
+    @OnClick({R.id.btn_lsm, R.id.btn_mm131, R.id.btn_web,R.id.btn_web1})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_lsm:
@@ -64,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btn_web:
                 startActivity(new Intent(this, WebActivity.class));
+                break;
+            case R.id.btn_web1:
+                startActivity(new Intent(this, Web1Activity.class));
                 break;
         }
     }

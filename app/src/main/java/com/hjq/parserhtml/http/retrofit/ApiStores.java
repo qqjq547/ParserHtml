@@ -30,8 +30,12 @@ public interface ApiStores {
      */
     @GET("{type}/{id}.html")
     Observable<String> getSize(@Path("type") String type,@Path("id") int id);
+
     @GET
     Observable<ResponseBody> downloadPicFromNet(@Url String fileUrl);
+
+    @GET
+    Observable<ResponseBody> downloadPicFromNet(@Header("Referer") String referer,@Url String fileUrl);
 
 
     /**

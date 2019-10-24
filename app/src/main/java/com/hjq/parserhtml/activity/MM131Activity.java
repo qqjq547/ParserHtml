@@ -33,6 +33,7 @@ import com.hjq.parserhtml.model.MM131;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -43,7 +44,7 @@ import rx.subscriptions.CompositeSubscription;
 
 public class MM131Activity extends AppCompatActivity {
     String type;
-    String dir = Environment.getExternalStorageDirectory() + File.separator + "mm131" + File.separator;
+    String basedir = Environment.getExternalStorageDirectory() + File.separator + "mm131" + File.separator;
     ArrayList<MM131> dataArr = new ArrayList<>();
     @BindView(R.id.wv_content)
     WebView wvContent;
@@ -66,6 +67,7 @@ public class MM131Activity extends AppCompatActivity {
     String curUrl;
     int curPos;
     int index;
+    String downDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +75,8 @@ public class MM131Activity extends AppCompatActivity {
         setContentView(R.layout.activity_mm131);
         ButterKnife.bind(this);
         type=getIntent().getStringExtra("type");
-        if (!new File(dir).exists()) {
-            new File(dir).mkdirs();
+        if (!new File(basedir).exists()) {
+            new File(basedir).mkdirs();
         }
         wvContent.getSettings().setJavaScriptEnabled(true);
         wvContent.getSettings().setBlockNetworkImage(true);
@@ -95,6 +97,12 @@ public class MM131Activity extends AppCompatActivity {
                 }else{
                     if (curPos<(dataArr.size()-1)) {
                         loadUrl(curPos+1, 1);
+                    }else {
+                        Toast.makeText(MM131Activity.this,"下载完成啦",Toast.LENGTH_SHORT).show();
+                        String startStr=String.valueOf(start+10);
+                        String endStr=String.valueOf(start+19);
+                        evStart.setText(startStr);
+                        evEnd.setText(endStr);
                     }
                 }
              
@@ -135,14 +143,16 @@ public class MM131Activity extends AppCompatActivity {
         addSubscription(RxUtil.createHttpObservable(ApiClient.getInstance1().getApiStores1().getSize(type,id)).subscribe(new ApiCallback<String>() {
             @Override
             public void onSuccess(String data) {
-                String tag = "<span class=\"rw\">1/";
+                String tag = "<span class=\"page-ch\">��";
                 int index = data.indexOf(tag);
                 int start = index + tag.length();
                 String endStr = data.substring(start);
                 String[] array = endStr.split("ҳ</span>");
+                Log.e("hjq","array="+array[0]);
                 int count = Integer.parseInt(array[0]);
-                String title=data.split("<h2 class=\"mm-title\">")[1].split("</h2>")[0];
-                String time=data.split("<span class=\"post-meta\">")[1].split("</span>")[0];
+                String title=data.split("<title>")[1].split("</title>")[0];
+                Log.e("hjq","title="+title);
+                String time=data.split("<div class=\"content-msg\">����ʱ�䣺")[1].split(" <a href")[0];
                 MM131 model=new MM131(id,title,count, 0);
                 model.setTime(time);
                 dataArr.add(model);
@@ -170,10 +180,10 @@ public class MM131Activity extends AppCompatActivity {
         }));
 
     }
-
     public void downPic(final int position, final int index) {
-        String url = "http://img1.mm131.com/pic/" + dataArr.get(position).getArrarId() + "/" +index+ ".jpg";
-        addSubscription(RxUtil.createBmpObservable(ApiClient.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
+        String url = "https://img1.mm131.me/pic/" + dataArr.get(position).getArrarId() + "/" +index+ ".jpg";
+        String referer="https://m.mm131.net/"+type+"/"+dataArr.get(position).getArrarId()+".html";
+        addSubscription(RxUtil.createBmpObservable(ApiClient.getInstance().getApiStores1().downloadPicFromNet(referer,url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 MM131 model = dataArr.get(position);
@@ -201,7 +211,7 @@ public class MM131Activity extends AppCompatActivity {
 
     }
     public void saveBitmap(Bitmap bm, final String fileName) {
-        File f = new File(dir, fileName);
+        File f = new File(downDir, fileName);
         if (f.exists()) {
             Log.i("hjq", "已经存在:" + f.getAbsolutePath());
             return;
@@ -228,6 +238,8 @@ public class MM131Activity extends AppCompatActivity {
         String endStr = evEnd.getText().toString().trim();
         switch (view.getId()) {
             case R.id.btn_get:
+                dataArr.clear();
+                adapter.notifyDataSetChanged();
                 if (TextUtils.isEmpty(startStr) || TextUtils.isEmpty(endStr)) {
                     Toast.makeText(this, "内容不能为空", Toast.LENGTH_SHORT).show();
                 } else {
@@ -241,9 +253,9 @@ public class MM131Activity extends AppCompatActivity {
                 }
                 break;
             case R.id.btn_down:
-                dir=dir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
-                if (!new File(dir).exists()) {
-                    new File(dir).mkdirs();
+                downDir=basedir+(start-start%100)+File.separator+startStr+"-"+endStr+File.separator;
+                if (!new File(downDir).exists()) {
+                    new File(downDir).mkdirs();
                 }
                 loadUrl(0,1);
                 break;
@@ -255,9 +267,9 @@ public class MM131Activity extends AppCompatActivity {
         this.curPos=pos;
         this.index=index;
         if (index>1) {
-            wvContent.loadUrl("http://m.mm131.com/" + type + "/" + model.getArrarId() + "_" + index + ".html");
+            wvContent.loadUrl("https://m.mm131.com/" + type + "/" + model.getArrarId() + "_" + index + ".html");
         }else {
-            wvContent.loadUrl("http://m.mm131.com/" + type + "/" + model.getArrarId()  + ".html");
+            wvContent.loadUrl("https://m.mm131.com/" + type + "/" + model.getArrarId()  + ".html");
         }
     }
 
@@ -274,3 +286,9 @@ public class MM131Activity extends AppCompatActivity {
         }
     }
 }
+//https://img1.mm131.me/pic/5096/51.jpg
+//https://img1.mm131.me/pic/5095/2.jpg
+
+//https://m.mm131.net/xinggan/5096.html
+//https://m.mm131.net/xinggan/5095.html
+//User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36

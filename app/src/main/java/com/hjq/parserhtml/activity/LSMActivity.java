@@ -22,9 +22,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.hjq.parserhtml.CommonUtil;
-import com.hjq.parserhtml.adapter.LSMAdapter;
 import com.hjq.parserhtml.R;
 import com.hjq.parserhtml.RxUtil;
+import com.hjq.parserhtml.adapter.LSMAdapter;
 import com.hjq.parserhtml.http.retrofit.ApiCallback;
 import com.hjq.parserhtml.http.retrofit.ApiClient2;
 import com.hjq.parserhtml.model.LSM;
@@ -71,7 +71,7 @@ public class LSMActivity extends AppCompatActivity {
     int curPos=0;
     int curPage=0;
     
-    String ip="https://www.lsm.me/";
+    String ip="https://www.lsmpx.com/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,7 +205,7 @@ public class LSMActivity extends AppCompatActivity {
 
     public void downPic(final int position, final int index,String url) {
         Log.d("hjq","downUrl="+url);
-        addSubscription(RxUtil.createCompressBmpObservable(ApiClient2.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
+        addSubscription(RxUtil.createBmpObservable(ApiClient2.getInstance().getApiStores().downloadPicFromNet(url)).subscribe(new ApiCallback<Bitmap>() {
             @Override
             public void onSuccess(Bitmap data) {
                 LSM model = dataArr.get(position);
@@ -350,7 +350,7 @@ public class LSMActivity extends AppCompatActivity {
                     String temp=textArr[i].split("<a href=\"thread-")[1].split("-")[0];
                     int typeid=Integer.parseInt(temp);
                     String title=textArr[i].split("alt=\"")[1].split("\"")[0];
-                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0];
+                    String thumb=textArr[i].split("<img src=\"")[1].split("\"")[0].replaceAll("\r|\n*","");
                     dataArr.add(new LSM(typeid,title,thumb,0,0,new ArrayList<String>()));
 //                    getNextTime(dataArr.size()-1,typeid);
                 }
@@ -378,7 +378,13 @@ public class LSMActivity extends AppCompatActivity {
                 if (data.split("数量：</span>").length>1){
                     String pagestr=data.split("数量：</span>")[1].split(" P")[0];
                     Log.e("hjq",pagestr);
-                    int total=Integer.parseInt(pagestr);
+                    int total=36;
+                    try {
+                         total=Integer.parseInt(pagestr);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                     totalPage=total%4==0?total/4:total/4+1;
                 }
                 Log.e("hjq","position="+curPos+",curPage="+curPage+",totalPage="+totalPage);

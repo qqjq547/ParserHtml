@@ -115,11 +115,11 @@ public class RxUtil {
                 .compose(RxUtil.<ResponseBody>rxSchedulerHelper())
                 .compose(RxUtil.<Bitmap>handleResult());
     }
-    public static <T> Observable<Bitmap> createCompressBmpObservable(Observable<ResponseBody> observable) {
-        return observable
-                .compose(RxUtil.<ResponseBody>rxSchedulerHelper())
-                .compose(RxUtil.<Bitmap>handleCompressResult());
-    }
+//    public static <T> Observable<Bitmap> createCompressBmpObservable(Observable<ResponseBody> observable) {
+//        return observable
+//                .compose(RxUtil.<ResponseBody>rxSchedulerHelper())
+//                .compose(RxUtil.<Bitmap>handleCompressResult());
+//    }
     public static <T> Observable<Document> createHtmlObservable(Observable<ResponseBody> observable) {
         return observable
                 .compose(RxUtil.<ResponseBody>rxSchedulerHelper())

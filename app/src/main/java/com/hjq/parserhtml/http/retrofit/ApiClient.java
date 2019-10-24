@@ -26,7 +26,7 @@ public class ApiClient {
     private static ApiClient instances;
     private ApiStores apiStores;
     private ApiStores apiStores1;
-    public static String API_SERVER_URL = "http://m.mm131.com/";
+    public static String API_SERVER_URL = "https://m.mm131.com/";
     public static OkHttpClient okHttpClient;
 
     public static Retrofit Retrofit(String baseUrl) {
@@ -40,8 +40,9 @@ public class ApiClient {
             public Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder()
-                        .header("Referer", "http://m.mm131.com/xinggan/3300.html")
-                        .header("Host", "img1.mm131.me")
+                        .header("Referer", "http://m.mm131.com/")
+                        .header("Upgrade-Insecure-Requests", "1")
+                        .header("Host", "m.mm131.com")
                         .method(original.method(), original.body());
                 Request request = requestBuilder.build();
                 return chain.proceed(request);
